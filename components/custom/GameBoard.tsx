@@ -29,7 +29,11 @@ export function GameBoard({
   onTilePress,
 }: GameBoardProps) {
   const gridSize = size;
-  const tileSize = (width - (PADDING * 2) - (GRID_MARGIN * (gridSize - 1))) / gridSize;
+  // Ensure tileSize is always valid
+  const tileSize = Math.max(
+    10, // Minimum tile size to prevent it from being too small
+    (width - PADDING * 2 - GRID_MARGIN * (gridSize - 1)) / gridSize
+  );
 
   const renderTile = (index: number) => {
     const isActive = isShowingPattern
@@ -72,7 +76,6 @@ export function GameBoard({
     );
   };
 
-  // Create an array with the correct number of tiles based on gridSize
   const totalTiles = gridSize * gridSize;
   const tiles = Array(totalTiles)
     .fill(0)

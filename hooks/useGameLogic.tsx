@@ -50,23 +50,24 @@ export function useGameLogic() {
   };
 
   const generatePattern = useCallback(() => {
-    // Calculate pattern length based on current level
     const patternLength = INITIAL_PATTERN_LENGTH + Math.floor(level / 2);
-    // Ensure we use the current grid size to determine the maximum tile index
     const maxTileIndex = gridSize * gridSize;
-    // Generate random pattern within the valid range
     const newPattern = Array(patternLength)
       .fill(0)
       .map(() => Math.floor(Math.random() * maxTileIndex));
+  
+    console.log('Generated Pattern:', newPattern); // Add this line
     setPattern(newPattern);
     return newPattern;
   }, [level, gridSize]);
 
-  const showPattern = useCallback(async () => {
+  const showPattern = useCallback(async (patternToShow: number[]) => {
     setIsShowingPattern(true);
     setPlayerPattern([]);
-
-    for (let i = 0; i < pattern.length; i++) {
+  
+    console.log('Showing Pattern:', patternToShow); // Log the pattern being shown
+  
+    for (let i = 0; i < patternToShow.length; i++) {
       setCurrentShowingIndex(i);
       await new Promise((resolve) =>
         setTimeout(
@@ -78,10 +79,10 @@ export function useGameLogic() {
         )
       );
     }
-
+  
     setCurrentShowingIndex(-1);
     setIsShowingPattern(false);
-  }, [pattern, level]);
+  }, [level]);
 
   const startGame = useCallback(() => {
     setGameOver(false);
@@ -89,17 +90,18 @@ export function useGameLogic() {
     setLevel(1);
     setGridSize(3);
     const newPattern = generatePattern();
+    console.log('Initial Pattern:', newPattern); // Log the initial pattern
     setPattern(newPattern);
-    showPattern();
+    showPattern(newPattern); // Pass the new pattern to showPattern
   }, [generatePattern, showPattern]);
-
+  
   const handleTilePress = useCallback(
     (tileIndex: number) => {
       if (isShowingPattern) return;
-
+  
       const newPlayerPattern = [...playerPattern, tileIndex];
       setPlayerPattern(newPlayerPattern);
-
+  
       const currentIndex = newPlayerPattern.length - 1;
       if (pattern[currentIndex] !== tileIndex) {
         setGameOver(true);
@@ -109,14 +111,12 @@ export function useGameLogic() {
         }
         return;
       }
-
+  
       if (newPlayerPattern.length === pattern.length) {
         setScore((prevScore) => prevScore + pattern.length * 10);
-        // Update level first, then generate a new pattern with the new level
         const newLevel = level + 1;
         setLevel(newLevel);
-        
-        // Determine the new grid size based on the new level
+  
         let newGridSize = gridSize;
         if (newLevel >= 10) {
           newGridSize = 5;
@@ -125,35 +125,28 @@ export function useGameLogic() {
         } else {
           newGridSize = 3;
         }
-        
-        // Update grid size if needed
+  
+        // Reset player pattern and current showing index when grid size changes
         if (newGridSize !== gridSize) {
+          setPlayerPattern([]);
+          setCurrentShowingIndex(-1);
           setGridSize(newGridSize);
         }
-        
+  
         setTimeout(() => {
-          // Calculate pattern length using the new level value directly
           const patternLength = INITIAL_PATTERN_LENGTH + Math.floor(newLevel / 2);
-          // Use the new grid size for calculating max tile index
           const maxTileIndex = newGridSize * newGridSize;
           const newPattern = Array(patternLength)
             .fill(0)
             .map(() => Math.floor(Math.random() * maxTileIndex));
-          
+  
+          console.log('Generated Pattern:', newPattern); // Log the new pattern
           setPattern(newPattern);
-          showPattern();
+          showPattern(newPattern); // Pass the new pattern to showPattern
         }, 1000);
       }
     },
-    [
-      isShowingPattern,
-      playerPattern,
-      pattern,
-      score,
-      highScore,
-      generatePattern,
-      showPattern,
-    ]
+    [isShowingPattern, playerPattern, pattern, score, highScore, level, gridSize]
   );
 
   return {

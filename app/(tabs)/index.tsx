@@ -1,74 +1,107 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import { GameBoard } from '../../components/custom/GameBoard';
+import { ScoreDisplay } from '../../components/custom/ScoreDisplay';
+import { useGameLogic } from '../../hooks/useGameLogic';
+import { Play } from 'lucide-react-native';
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+export default function GameScreen() {
+  const {
+    pattern,
+    playerPattern,
+    isShowingPattern,
+    currentShowingIndex,
+    score,
+    highScore,
+    level,
+    gridSize,
+    gameOver,
+    handleTilePress,
+    startGame,
+  } = useGameLogic();
 
-export default function HomeScreen() {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+    <View style={styles.container}>
+      <ScoreDisplay score={score} highScore={highScore} level={level} />
+      
+      {gameOver ? (
+        <View style={styles.gameOverContainer}>
+          <Text style={styles.gameOverText}>Game Over!</Text>
+          <Text style={styles.finalScoreText}>Final Score: {score}</Text>
+          <TouchableOpacity style={styles.button} onPress={startGame}>
+            <Play color="#fff" size={24} />
+            <Text style={styles.buttonText}>Play Again</Text>
+          </TouchableOpacity>
+        </View>
+      ) : pattern.length === 0 ? (
+        <View style={styles.startContainer}>
+          <Text style={styles.titleText}>Memory Tiles</Text>
+          <TouchableOpacity style={styles.button} onPress={startGame}>
+            <Play color="#fff" size={24} />
+            <Text style={styles.buttonText}>Start Game</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <GameBoard
+          size={gridSize}
+          pattern={pattern}
+          playerPattern={playerPattern}
+          isShowingPattern={isShowingPattern}
+          currentShowingIndex={currentShowingIndex}
+          onTilePress={handleTilePress}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+    backgroundColor: '#121212',
+  },
+  gameOverContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  gameOverText: {
+    fontSize: 32,
+    color: '#fff',
+    fontFamily: 'Inter-Bold',
+    marginBottom: 16,
+  },
+  finalScoreText: {
+    fontSize: 24,
+    color: '#666',
+    fontFamily: 'Inter-Regular',
+    marginBottom: 32,
+  },
+  startContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  titleText: {
+    fontSize: 40,
+    color: '#fff',
+    fontFamily: 'Inter-Bold',
+    marginBottom: 32,
+  },
+  button: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    backgroundColor: '#4CAF50',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+    elevation: 3,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontFamily: 'Inter-Bold',
+    marginLeft: 8,
   },
 });

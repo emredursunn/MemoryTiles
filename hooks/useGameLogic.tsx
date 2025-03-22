@@ -14,9 +14,10 @@ export function useGameLogic() {
   const [highScore, setHighScore] = useState(0);
   const [level, setLevel] = useState(1);
   const [gameOver, setGameOver] = useState(false);
+  const [consecutiveActivations, setConsecutiveActivations] = useState<{ [key: number]: number }>({});
 
   // Fixed grid size (e.g., 4x4)
-  const gridSize = 4;
+  const gridSize = 3;
 
   useEffect(() => {
     loadHighScore();
@@ -51,28 +52,30 @@ export function useGameLogic() {
     return newPattern;
   }, [level, gridSize]);
 
-  const showPattern = useCallback(async (patternToShow: number[]) => {
-    setIsShowingPattern(true);
-    setPlayerPattern([]);
+const showPattern = useCallback(async (patternToShow: number[]) => {
+  setIsShowingPattern(true);
+  setPlayerPattern([]);
+  setConsecutiveActivations({});
 
-    console.log('Showing Pattern:', patternToShow); // Log the pattern being shown
+  // Dynamic speed based on level
+  const baseSpeed = Math.max(
+    MIN_DISPLAY_DURATION,
+    INITIAL_DISPLAY_DURATION - level * 50
+  );
 
-    for (let i = 0; i < patternToShow.length; i++) {
-      setCurrentShowingIndex(i);
-      await new Promise((resolve) =>
-        setTimeout(
-          resolve,
-          Math.max(
-            MIN_DISPLAY_DURATION,
-            INITIAL_DISPLAY_DURATION - level * 50
-          )
-        )
-      );
+  for (let i = 0; i < patternToShow.length; i++) {
+    const tileIndex = patternToShow[i];
+    setConsecutiveActivations((prev) => ({ ...prev, [tileIndex]: (prev[tileIndex] || 0) + 1 }));
+    setCurrentShowingIndex(i);
+    await new Promise((resolve) => setTimeout(resolve, baseSpeed));
+    
+    if (i < patternToShow.length - 1 && patternToShow[i + 1] !== tileIndex) {
+      setConsecutiveActivations((prev) => ({ ...prev, [tileIndex]: 0 }));
     }
+  }
 
-    setCurrentShowingIndex(-1);
-    setIsShowingPattern(false);
-  }, [level]);
+  setIsShowingPattern(false);
+}, [level]);
 
   const startGame = useCallback(() => {
     setGameOver(false);
@@ -87,10 +90,16 @@ export function useGameLogic() {
   const handleTilePress = useCallback(
     (tileIndex: number) => {
       if (isShowingPattern) return;
-
+  
+      // Update consecutive activations
+      setConsecutiveActivations((prev) => ({
+        ...prev,
+        [tileIndex]: (prev[tileIndex] || 0) + 1,
+      }));
+  
       const newPlayerPattern = [...playerPattern, tileIndex];
       setPlayerPattern(newPlayerPattern);
-
+  
       const currentIndex = newPlayerPattern.length - 1;
       if (pattern[currentIndex] !== tileIndex) {
         setGameOver(true);
@@ -100,26 +109,26 @@ export function useGameLogic() {
         }
         return;
       }
-
+  
       if (newPlayerPattern.length === pattern.length) {
         setScore((prevScore) => prevScore + pattern.length * 10);
         const newLevel = level + 1;
         setLevel(newLevel);
-
+  
         // Reset player pattern and current showing index
         setPlayerPattern([]);
         setCurrentShowingIndex(-1);
-
+  
         setTimeout(() => {
           const patternLength = INITIAL_PATTERN_LENGTH + Math.floor(newLevel / 2);
-          const maxTileIndex = gridSize * gridSize; // Use the fixed grid size
+          const maxTileIndex = gridSize * gridSize;
           const newPattern = Array(patternLength)
             .fill(0)
             .map(() => Math.floor(Math.random() * maxTileIndex));
-
-          console.log('Generated Pattern:', newPattern); // Log the new pattern
+  
+          console.log('Generated Pattern:', newPattern);
           setPattern(newPattern);
-          showPattern(newPattern); // Pass the new pattern to showPattern
+          showPattern(newPattern);
         }, 1000);
       }
     },
@@ -136,6 +145,7 @@ export function useGameLogic() {
     level,
     gridSize,
     gameOver,
+    consecutiveActivations,
     handleTilePress,
     startGame,
   };

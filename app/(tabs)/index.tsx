@@ -17,9 +17,13 @@ export default function GameScreen() {
     level,
     gridSize,
     gameOver,
+    consecutiveActivations,
     handleTilePress,
     startGame,
   } = useGameLogic();
+
+  // Debugging logs
+  console.log('Consecutive Activations in GameScreen:', consecutiveActivations);
 
   return (
     <View style={styles.container}>
@@ -49,6 +53,7 @@ export default function GameScreen() {
           playerPattern={playerPattern}
           isShowingPattern={isShowingPattern}
           currentShowingIndex={currentShowingIndex}
+          consecutiveActivations={consecutiveActivations} // Ensure this is passed
           onTilePress={handleTilePress}
         />
       )}

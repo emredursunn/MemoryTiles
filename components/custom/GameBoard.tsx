@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -6,6 +6,7 @@ import Animated, {
   withSequence,
 } from 'react-native-reanimated';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import { Audio } from 'expo-av';
 
 const { width } = Dimensions.get('window');
 const PADDING = 20;
@@ -17,17 +18,48 @@ interface GameBoardProps {
   playerPattern: number[];
   isShowingPattern: boolean;
   currentShowingIndex: number;
+  consecutiveActivations: { [key: number]: number };
   onTilePress: (index: number) => void;
 }
 
 export function GameBoard({
-  size, // Fixed grid size
+  size,
   pattern,
   playerPattern,
   isShowingPattern,
   currentShowingIndex,
+  consecutiveActivations = {}, // Default value to avoid undefined
   onTilePress,
 }: GameBoardProps) {
+  const [correctSound, setCorrectSound] = useState<Audio.Sound | null>(null);
+  const [wrongSound, setWrongSound] = useState<Audio.Sound | null>(null);
+
+  useEffect(() => {
+    const loadSounds = async () => {
+      const { sound: correct } = await Audio.Sound.createAsync(
+        require('../../assets/music/correct.mp3')
+      );
+      const { sound: wrong } = await Audio.Sound.createAsync(
+        require('../../assets/music/wrong.mp3')
+      );
+      setCorrectSound(correct);
+      setWrongSound(wrong);
+    };
+
+    loadSounds();
+
+    return () => {
+      correctSound?.unloadAsync();
+      wrongSound?.unloadAsync();
+    };
+  }, []);
+
+  const playSound = async (sound: Audio.Sound | null) => {
+    if (sound) {
+      await sound.replayAsync();
+    }
+  };
+
   const gridSize = size;
   const tileSize = Math.max(
     10, // Minimum tile size to prevent it from being too small
@@ -38,6 +70,35 @@ export function GameBoard({
   const totalTiles = gridSize * gridSize;
   const tileIndices = Array(totalTiles).fill(0).map((_, index) => index);
 
+  // Function to get the tile color based on consecutive activations
+  const getTileColor = (index: number): string => {
+    'worklet'
+    const activationCount = consecutiveActivations[index] || 0;
+
+    if (activationCount === 1) return '#4CAF50'; // Green
+    if (activationCount === 2) return '#FF9800'; // Orange
+    if (activationCount >= 3) return '#F44336'; // Red
+
+    return '#333333'; // Default color
+  };
+
+  const handleTilePressWithFeedback = (index: number) => {
+    if (isShowingPattern) return;
+
+    // Play sound and update animations
+    const isCorrect = pattern[playerPattern.length] === index;
+    if (isCorrect) {
+      playSound(correctSound);
+    } else {
+      playSound(wrongSound);
+    }
+
+    onTilePress(index);
+  };
+
+  // Debugging logs
+  console.log('Consecutive Activations in GameBoard:', consecutiveActivations);
+
   // Pre-define animated styles for all tiles
   const animatedStyles = tileIndices.map((index) => {
     const isActive = isShowingPattern
@@ -46,7 +107,7 @@ export function GameBoard({
 
     return useAnimatedStyle(() => {
       return {
-        backgroundColor: withTiming(isActive ? '#4CAF50' : '#333333', {
+        backgroundColor: withTiming(isActive ? getTileColor(index) : '#333333', {
           duration: 300,
         }),
         transform: [
@@ -74,7 +135,7 @@ export function GameBoard({
         {tileIndices.map((index) => (
           <TouchableOpacity
             key={index}
-            onPress={() => !isShowingPattern && onTilePress(index)}
+            onPress={() => handleTilePressWithFeedback(index)}
             disabled={isShowingPattern}>
             <Animated.View
               style={[

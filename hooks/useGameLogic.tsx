@@ -13,24 +13,14 @@ export function useGameLogic() {
   const [score, setScore] = useState(0);
   const [highScore, setHighScore] = useState(0);
   const [level, setLevel] = useState(1);
-  const [gridSize, setGridSize] = useState(3);
   const [gameOver, setGameOver] = useState(false);
+
+  // Fixed grid size (e.g., 4x4)
+  const gridSize = 4;
 
   useEffect(() => {
     loadHighScore();
   }, []);
-
-  // Update grid size when level changes
-  useEffect(() => {
-    // Update grid size based on level
-    if (level >= 10) {
-      setGridSize(5);
-    } else if (level >= 5) {
-      setGridSize(4);
-    } else {
-      setGridSize(3);
-    }
-  }, [level]);
 
   const loadHighScore = async () => {
     try {
@@ -55,8 +45,8 @@ export function useGameLogic() {
     const newPattern = Array(patternLength)
       .fill(0)
       .map(() => Math.floor(Math.random() * maxTileIndex));
-  
-    console.log('Generated Pattern:', newPattern); // Add this line
+
+    console.log('Generated Pattern:', newPattern);
     setPattern(newPattern);
     return newPattern;
   }, [level, gridSize]);
@@ -64,9 +54,9 @@ export function useGameLogic() {
   const showPattern = useCallback(async (patternToShow: number[]) => {
     setIsShowingPattern(true);
     setPlayerPattern([]);
-  
+
     console.log('Showing Pattern:', patternToShow); // Log the pattern being shown
-  
+
     for (let i = 0; i < patternToShow.length; i++) {
       setCurrentShowingIndex(i);
       await new Promise((resolve) =>
@@ -79,7 +69,7 @@ export function useGameLogic() {
         )
       );
     }
-  
+
     setCurrentShowingIndex(-1);
     setIsShowingPattern(false);
   }, [level]);
@@ -88,20 +78,19 @@ export function useGameLogic() {
     setGameOver(false);
     setScore(0);
     setLevel(1);
-    setGridSize(3);
     const newPattern = generatePattern();
     console.log('Initial Pattern:', newPattern); // Log the initial pattern
     setPattern(newPattern);
     showPattern(newPattern); // Pass the new pattern to showPattern
   }, [generatePattern, showPattern]);
-  
+
   const handleTilePress = useCallback(
     (tileIndex: number) => {
       if (isShowingPattern) return;
-  
+
       const newPlayerPattern = [...playerPattern, tileIndex];
       setPlayerPattern(newPlayerPattern);
-  
+
       const currentIndex = newPlayerPattern.length - 1;
       if (pattern[currentIndex] !== tileIndex) {
         setGameOver(true);
@@ -111,35 +100,23 @@ export function useGameLogic() {
         }
         return;
       }
-  
+
       if (newPlayerPattern.length === pattern.length) {
         setScore((prevScore) => prevScore + pattern.length * 10);
         const newLevel = level + 1;
         setLevel(newLevel);
-  
-        let newGridSize = gridSize;
-        if (newLevel >= 10) {
-          newGridSize = 5;
-        } else if (newLevel >= 5) {
-          newGridSize = 4;
-        } else {
-          newGridSize = 3;
-        }
-  
-        // Reset player pattern and current showing index when grid size changes
-        if (newGridSize !== gridSize) {
-          setPlayerPattern([]);
-          setCurrentShowingIndex(-1);
-          setGridSize(newGridSize);
-        }
-  
+
+        // Reset player pattern and current showing index
+        setPlayerPattern([]);
+        setCurrentShowingIndex(-1);
+
         setTimeout(() => {
           const patternLength = INITIAL_PATTERN_LENGTH + Math.floor(newLevel / 2);
-          const maxTileIndex = newGridSize * newGridSize;
+          const maxTileIndex = gridSize * gridSize; // Use the fixed grid size
           const newPattern = Array(patternLength)
             .fill(0)
             .map(() => Math.floor(Math.random() * maxTileIndex));
-  
+
           console.log('Generated Pattern:', newPattern); // Log the new pattern
           setPattern(newPattern);
           showPattern(newPattern); // Pass the new pattern to showPattern

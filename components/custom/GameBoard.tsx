@@ -21,7 +21,7 @@ interface GameBoardProps {
 }
 
 export function GameBoard({
-  size,
+  size, // Fixed grid size
   pattern,
   playerPattern,
   isShowingPattern,
@@ -29,18 +29,22 @@ export function GameBoard({
   onTilePress,
 }: GameBoardProps) {
   const gridSize = size;
-  // Ensure tileSize is always valid
   const tileSize = Math.max(
     10, // Minimum tile size to prevent it from being too small
     (width - PADDING * 2 - GRID_MARGIN * (gridSize - 1)) / gridSize
   );
 
-  const renderTile = (index: number) => {
+  // Create an array of tile indices
+  const totalTiles = gridSize * gridSize;
+  const tileIndices = Array(totalTiles).fill(0).map((_, index) => index);
+
+  // Pre-define animated styles for all tiles
+  const animatedStyles = tileIndices.map((index) => {
     const isActive = isShowingPattern
       ? pattern[currentShowingIndex] === index
       : playerPattern.includes(index);
 
-    const animatedStyle = useAnimatedStyle(() => {
+    return useAnimatedStyle(() => {
       return {
         backgroundColor: withTiming(isActive ? '#4CAF50' : '#333333', {
           duration: 300,
@@ -55,31 +59,7 @@ export function GameBoard({
         ],
       };
     });
-
-    return (
-      <TouchableOpacity
-        key={index}
-        onPress={() => !isShowingPattern && onTilePress(index)}
-        disabled={isShowingPattern}>
-        <Animated.View
-          style={[
-            styles.tile,
-            {
-              width: tileSize,
-              height: tileSize,
-              margin: GRID_MARGIN / 2,
-            },
-            animatedStyle,
-          ]}
-        />
-      </TouchableOpacity>
-    );
-  };
-
-  const totalTiles = gridSize * gridSize;
-  const tiles = Array(totalTiles)
-    .fill(0)
-    .map((_, index) => renderTile(index));
+  });
 
   return (
     <View style={styles.container}>
@@ -91,7 +71,24 @@ export function GameBoard({
             height: width - PADDING * 2,
           },
         ]}>
-        {tiles}
+        {tileIndices.map((index) => (
+          <TouchableOpacity
+            key={index}
+            onPress={() => !isShowingPattern && onTilePress(index)}
+            disabled={isShowingPattern}>
+            <Animated.View
+              style={[
+                styles.tile,
+                {
+                  width: tileSize,
+                  height: tileSize,
+                  margin: GRID_MARGIN / 2,
+                },
+                animatedStyles[index], // Use pre-defined animated style
+              ]}
+            />
+          </TouchableOpacity>
+        ))}
       </View>
     </View>
   );

@@ -1,3 +1,5 @@
+//Gameboard.tsx
+
 import React from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import Animated, {
@@ -17,15 +19,17 @@ interface GameBoardProps {
   playerPattern: number[];
   isShowingPattern: boolean;
   currentShowingIndex: number;
+  consecutiveActivations: { [key: number]: number };
   onTilePress: (index: number) => void;
 }
 
 export function GameBoard({
-  size, // Fixed grid size
+  size,
   pattern,
   playerPattern,
   isShowingPattern,
   currentShowingIndex,
+  consecutiveActivations = {}, // Default value to avoid undefined
   onTilePress,
 }: GameBoardProps) {
   const gridSize = size;
@@ -38,6 +42,19 @@ export function GameBoard({
   const totalTiles = gridSize * gridSize;
   const tileIndices = Array(totalTiles).fill(0).map((_, index) => index);
 
+  // Function to get the tile color based on consecutive activations
+  const getTileColor = (index: number): string => {
+    'worklet'
+    const activationCount = consecutiveActivations[index] || 0;
+
+    if (activationCount === 1) return '#4CAF50'; // Green
+    if (activationCount === 2) return '#FF9800'; // Orange
+    if (activationCount >= 3) return '#F44336'; // Red
+
+    return '#333333'; // Default color
+  };
+
+
   // Pre-define animated styles for all tiles
   const animatedStyles = tileIndices.map((index) => {
     const isActive = isShowingPattern
@@ -46,7 +63,7 @@ export function GameBoard({
 
     return useAnimatedStyle(() => {
       return {
-        backgroundColor: withTiming(isActive ? '#4CAF50' : '#333333', {
+        backgroundColor: withTiming(isActive ? getTileColor(index) : '#333333', {
           duration: 300,
         }),
         transform: [

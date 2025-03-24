@@ -6,6 +6,7 @@ import { GameBoard } from '../../components/custom/GameBoard';
 import { ScoreDisplay } from '../../components/custom/ScoreDisplay';
 import { useGameLogic } from '../../hooks/useGameLogic';
 import { PauseIcon, Play, SettingsIcon } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
 
 export default function GameScreen() {
   const {
@@ -22,6 +23,8 @@ export default function GameScreen() {
     handleTilePress,
     startGame,
   } = useGameLogic();
+
+  const router = useRouter();
 
   return (
     <View style={styles.container}>
@@ -60,7 +63,7 @@ export default function GameScreen() {
               <PauseIcon color="#fff" size={28} />
             </TouchableOpacity>
             <Text style={styles.levelText}>Level {level}</Text>
-            <TouchableOpacity style={styles.iconButton}>
+            <TouchableOpacity style={styles.iconButton} onPress={() => router.push('/settings')}>
               <SettingsIcon color="#fff" size={28} />
             </TouchableOpacity>
           </View>

@@ -1,13 +1,14 @@
 //Gameboard.tsx
+
 import React from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   withTiming,
+  withSequence,
 } from 'react-native-reanimated';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import useAudio from '@/hooks/useAudio';
-import { useTheme } from '@/contexts/ThemeContext';
 
 const { width, height } = Dimensions.get('window');
 const PADDING = 10; // Daha az padding
@@ -52,8 +53,7 @@ const tileSize = Math.min(
       onTilePress(index);
     }
   };
-
-  const theme = useTheme();
+  
 
   // Function to get the tile color based on consecutive activations
   const colors = ['#4CAF50', '#FF9800', '#F44336', '#a83291', '#4632a8'];
@@ -88,7 +88,7 @@ const animatedStyles = tileIndices.map((index) => {
 });
 
   return (
-    <View style={[styles.container, {backgroundColor:theme.background}]}>
+    <View style={styles.container}>
       <View
         style={[
           styles.grid,

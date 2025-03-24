@@ -4,6 +4,7 @@ import useAudio from './useAudio';
 import { useSettings } from '../contexts/SettingsContext';
 
 const INITIAL_PATTERN_LENGTH = 3;
+const INITIAL_DISPLAY_DURATION = 1000;
 const MIN_DISPLAY_DURATION = 500;
 
 export function useGameLogic() {
@@ -18,9 +19,10 @@ export function useGameLogic() {
   const [consecutiveActivations, setConsecutiveActivations] = useState<{ [key: number]: number }>({});
 
   const { playFailSound } = useAudio();
-  const { gridSize, displaySpeed } = useSettings();
+  
 
-  const INITIAL_DISPLAY_DURATION = displaySpeed; // Ayarlardan alınan değer
+  // Fixed grid size (e.g., 4x4)
+  const gridSize = 4;
 
   useEffect(() => {
     loadHighScore();

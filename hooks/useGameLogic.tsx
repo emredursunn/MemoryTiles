@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import useAudio from './useAudio';
+import { useSettings } from '../contexts/SettingsContext';
 
 const INITIAL_PATTERN_LENGTH = 3;
-const INITIAL_DISPLAY_DURATION = 1000;
 const MIN_DISPLAY_DURATION = 500;
 
 export function useGameLogic() {
@@ -16,8 +17,10 @@ export function useGameLogic() {
   const [gameOver, setGameOver] = useState(false);
   const [consecutiveActivations, setConsecutiveActivations] = useState<{ [key: number]: number }>({});
 
-  // Fixed grid size (e.g., 4x4)
-  const gridSize = 3;
+  const { playFailSound } = useAudio();
+  const { gridSize, displaySpeed } = useSettings();
+
+  const INITIAL_DISPLAY_DURATION = displaySpeed; // Ayarlardan alınan değer
 
   useEffect(() => {
     loadHighScore();
@@ -130,6 +133,7 @@ export function useGameLogic() {
 
       const currentIndex = newPlayerPattern.length - 1;
       if (pattern[currentIndex] !== tileIndex) {
+        playFailSound(); // Hata yapınca fail sesi
         setGameOver(true);
         if (score > highScore) {
           setHighScore(score);
@@ -162,7 +166,7 @@ export function useGameLogic() {
         }, 500); // 500ms delay before starting the next level
       }
     },
-    [isShowingPattern, playerPattern, pattern, score, highScore, level, gridSize]
+    [isShowingPattern, playerPattern, pattern, score, highScore, level, gridSize, playFailSound]
   );
 
   return {

@@ -1,39 +1,39 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import Animated, {
-  useAnimatedStyle,
-  withSpring,
-} from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import { Crown, Trophy, Award, Star, BarChart } from 'lucide-react-native';
 
-interface ScoreDisplayProps {
-  score: number;
-  highScore: number;
-  level: number;
+type ScoreDisplayProps = {
+  score:any,
+  highScore:any,
+  level:any
 }
 
 export function ScoreDisplay({ score, highScore, level }: ScoreDisplayProps) {
-  const animatedScoreStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: withSpring(1.2) }],
-    };
-  });
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: withSpring(1.1) }],
+  }));
 
   return (
     <View style={styles.container}>
-      <View style={styles.scoreContainer}>
-        <Text style={styles.label}>Score</Text>
-        <Animated.Text style={[styles.score, animatedScoreStyle]}>
-          {score}
-        </Animated.Text>
-      </View>
-      <View style={styles.scoreContainer}>
-        <Text style={styles.label}>High Score</Text>
-        <Text style={styles.score}>{highScore}</Text>
-      </View>
-      <View style={styles.scoreContainer}>
-        <Text style={styles.label}>Level</Text>
+      {/* Level Gösterimi */}
+      <View style={styles.scoreItem}>
+        <Award size={24} color="#FFD700" />
         <Text style={styles.score}>{level}</Text>
       </View>
+      
+      {/* Skor Gösterimi */}
+      <View style={styles.scoreItem}>
+        <BarChart size={24} color="#4CAF50" />
+        <Text style={styles.score}>{score}</Text>
+      </View>
+      
+      {/* En Yüksek Skor */}
+     <Animated.View style={[styles.scoreItem, animatedStyle]}>
+        <Trophy size={24} color="#FF9800" />
+        <Animated.Text style={styles.score}>{highScore}</Animated.Text>
+    </Animated.View>
     </View>
   );
 }
@@ -42,22 +42,22 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    alignItems: 'center',
-    paddingVertical: 20,
-    backgroundColor: '#1a1a1a',
+    paddingVertical: 15,
+    backgroundColor: 'rgba(30, 30, 30, 0.9)',
+    borderRadius: 20,
+    marginHorizontal: 20,
+    marginTop: 10,
   },
-  scoreContainer: {
+  scoreItem: {
+    flexDirection: 'row',
     alignItems: 'center',
-  },
-  label: {
-    color: '#666',
-    fontSize: 14,
-    fontFamily: 'Inter-Regular',
-    marginBottom: 5,
+    gap: 8,
   },
   score: {
     color: '#fff',
-    fontSize: 24,
+    fontSize: 20,
     fontFamily: 'Inter-Bold',
+    minWidth: 40,
+    textAlign: 'center',
   },
 });

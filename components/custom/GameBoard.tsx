@@ -1,17 +1,17 @@
 //Gameboard.tsx
-
 import React from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   withTiming,
-  withSequence,
 } from 'react-native-reanimated';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import useAudio from '@/hooks/useAudio';
+import { useTheme } from '@/contexts/ThemeContext';
 
-const { width } = Dimensions.get('window');
-const PADDING = 20;
-const GRID_MARGIN = 10;
+const { width, height } = Dimensions.get('window');
+const PADDING = 10; // Daha az padding
+const GRID_MARGIN = 8;
 
 interface GameBoardProps {
   size: number;
@@ -29,69 +29,79 @@ export function GameBoard({
   playerPattern,
   isShowingPattern,
   currentShowingIndex,
-  consecutiveActivations = {}, // Default value to avoid undefined
+  consecutiveActivations = {},
   onTilePress,
 }: GameBoardProps) {
   const gridSize = size;
-  const tileSize = Math.max(
-    10, // Minimum tile size to prevent it from being too small
-    (width - PADDING * 2 - GRID_MARGIN * (gridSize - 1)) / gridSize
-  );
-
+  const { playBubbleSound, playFailSound } = useAudio();
+  // Calculate available width after accounting for padding
+  const availableWidth = width - PADDING * 2;
+  
+// Tile boyutunu hesaplarken yüksekliği de dikkate al
+const tileSize = Math.min(
+  (width - PADDING * 2 - (gridSize + 1) * GRID_MARGIN) / gridSize,
+  (height * 0.6 - PADDING * 2 - (gridSize + 1) * GRID_MARGIN) / gridSize
+);
   // Create an array of tile indices
   const totalTiles = gridSize * gridSize;
   const tileIndices = Array(totalTiles).fill(0).map((_, index) => index);
 
+  const handlePress = (index: number) => {
+    if (!isShowingPattern) {
+      playBubbleSound(); // Kutulara basınca bubble sesi
+      onTilePress(index);
+    }
+  };
+
+  const theme = useTheme();
+
   // Function to get the tile color based on consecutive activations
+  const colors = ['#4CAF50', '#FF9800', '#F44336', '#a83291', '#4632a8'];
   const getTileColor = (index: number): string => {
     'worklet'
     const activationCount = consecutiveActivations[index] || 0;
+    
+    if (activationCount === 0) return '#333333'; // Default color
 
-    if (activationCount === 1) return '#4CAF50'; // Green
-    if (activationCount === 2) return '#FF9800'; // Orange
-    if (activationCount >= 3) return '#F44336'; // Red
-
-    return '#333333'; // Default color
+    return colors[Math.min(activationCount - 1, colors.length - 1)];
   };
 
+  const sharedAnimatedStyle = (isActive: boolean, index: number) => {
+    return useAnimatedStyle(() => ({
+      backgroundColor: withTiming(isActive ? getTileColor(index) : '#333333', {
+        duration: 80,
+      }),
+      transform: [
+        {
+          scale: withTiming(isActive ? 1.05 : 1, { duration: 80 }),
+        },
+      ],
+    }));
+  };
 
-  // Pre-define animated styles for all tiles
-  const animatedStyles = tileIndices.map((index) => {
-    const isActive = isShowingPattern
-      ? pattern[currentShowingIndex] === index
-      : playerPattern.includes(index);
+const animatedStyles = tileIndices.map((index) => {
+  const isActive = isShowingPattern
+    ? pattern[currentShowingIndex] === index
+    : playerPattern.includes(index);
 
-    return useAnimatedStyle(() => {
-      return {
-        backgroundColor: withTiming(isActive ? getTileColor(index) : '#333333', {
-          duration: 300,
-        }),
-        transform: [
-          {
-            scale: withSequence(
-              withTiming(isActive ? 1.1 : 1, { duration: 150 }),
-              withTiming(1, { duration: 150 })
-            ),
-          },
-        ],
-      };
-    });
-  });
+    return sharedAnimatedStyle(isActive, index);
+});
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, {backgroundColor:theme.background}]}>
       <View
         style={[
           styles.grid,
           {
-            width: width - PADDING * 2,
-            height: width - PADDING * 2,
+            width: availableWidth,
+            height: availableWidth,
+            paddingHorizontal: GRID_MARGIN / 2, // Add horizontal padding to grid for margins
           },
         ]}>
         {tileIndices.map((index) => (
           <TouchableOpacity
             key={index}
-            onPress={() => !isShowingPattern && onTilePress(index)}
+            onPress={() => handlePress(index)}
             disabled={isShowingPattern}>
             <Animated.View
               style={[
@@ -101,7 +111,7 @@ export function GameBoard({
                   height: tileSize,
                   margin: GRID_MARGIN / 2,
                 },
-                animatedStyles[index], // Use pre-defined animated style
+                animatedStyles[index],
               ]}
             />
           </TouchableOpacity>
@@ -113,6 +123,7 @@ export function GameBoard({
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     padding: PADDING,
@@ -124,14 +135,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   tile: {
-    borderRadius: 8,
+    borderRadius: 12,
     elevation: 3,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
 });

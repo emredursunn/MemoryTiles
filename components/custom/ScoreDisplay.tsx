@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Animated, { useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { Crown, Trophy, Award, Star, BarChart } from 'lucide-react-native';
+import { useTheme } from '../../contexts/ThemeContext';
 
 type ScoreDisplayProps = {
   score:any,
@@ -10,29 +11,30 @@ type ScoreDisplayProps = {
 }
 
 export function ScoreDisplay({ score, highScore, level }: ScoreDisplayProps) {
+  const themeColors = useTheme();
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: withSpring(1.1) }],
   }));
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: themeColors.controlBar + 'E6' }]}>
       {/* Level Gösterimi */}
       <View style={styles.scoreItem}>
         <Award size={24} color="#FFD700" />
-        <Text style={styles.score}>{level}</Text>
+        <Text style={[styles.score, { color: themeColors.text }]}>{level}</Text>
       </View>
       
       {/* Skor Gösterimi */}
       <View style={styles.scoreItem}>
         <BarChart size={24} color="#4CAF50" />
-        <Text style={styles.score}>{score}</Text>
+        <Text style={[styles.score, { color: themeColors.text }]}>{score}</Text>
       </View>
       
       {/* En Yüksek Skor */}
      <Animated.View style={[styles.scoreItem, animatedStyle]}>
         <Trophy size={24} color="#FF9800" />
-        <Animated.Text style={styles.score}>{highScore}</Animated.Text>
+        <Animated.Text style={[styles.score, { color: themeColors.text }]}>{highScore}</Animated.Text>
     </Animated.View>
     </View>
   );
@@ -43,7 +45,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     paddingVertical: 15,
-    backgroundColor: 'rgba(30, 30, 30, 0.9)',
     borderRadius: 20,
     marginHorizontal: 20,
     marginTop: 10,
@@ -54,9 +55,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   score: {
-    color: '#fff',
     fontSize: 20,
-    fontFamily: 'Inter-Bold',
+    fontWeight: 'bold',
     minWidth: 40,
     textAlign: 'center',
   },

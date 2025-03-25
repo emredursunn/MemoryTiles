@@ -4,8 +4,7 @@ import useAudio from './useAudio';
 import { useSettings } from '../contexts/SettingsContext';
 
 const INITIAL_PATTERN_LENGTH = 3;
-const INITIAL_DISPLAY_DURATION = 1000;
-const MIN_DISPLAY_DURATION = 500;
+const MIN_DISPLAY_DURATION = 300;
 
 export function useGameLogic() {
   const [pattern, setPattern] = useState<number[]>([]);
@@ -19,10 +18,7 @@ export function useGameLogic() {
   const [consecutiveActivations, setConsecutiveActivations] = useState<{ [key: number]: number }>({});
 
   const { playFailSound } = useAudio();
-  
-
-  // Fixed grid size (e.g., 4x4)
-  const gridSize = 4;
+  const { gridSize, displaySpeed } = useSettings();
 
   useEffect(() => {
     loadHighScore();
@@ -81,7 +77,7 @@ export function useGameLogic() {
           resolve,
           Math.max(
             MIN_DISPLAY_DURATION,
-            INITIAL_DISPLAY_DURATION - level * 50
+            displaySpeed - (level * 50)
           )
         )
       );
@@ -99,7 +95,7 @@ export function useGameLogic() {
     setConsecutiveActivations({});
     setCurrentShowingIndex(-1);
     setIsShowingPattern(false);
-  }, [level]);
+  }, [level, displaySpeed]);
 
   const startGame = useCallback(() => {
     setGameOver(false);

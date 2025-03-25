@@ -1,12 +1,14 @@
 // index.tsx
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, StatusBar } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { GameBoard } from '../../components/custom/GameBoard';
 import { ScoreDisplay } from '../../components/custom/ScoreDisplay';
 import { useGameLogic } from '../../hooks/useGameLogic';
 import { PauseIcon, Play, SettingsIcon } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
+import { useTheme } from '../../contexts/ThemeContext';
+import { useSettings } from '../../contexts/SettingsContext';
 
 export default function GameScreen() {
   const {
@@ -25,15 +27,18 @@ export default function GameScreen() {
   } = useGameLogic();
 
   const router = useRouter();
+  const themeColors = useTheme();
+  const { theme } = useSettings();
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+      <StatusBar barStyle={theme === 'dark' ? 'light-content' : 'dark-content'} />
       <ScoreDisplay score={score} highScore={highScore} level={level} />
       
       {gameOver ? (
         <View style={styles.gameOverContainer}>
-          <Text style={styles.gameOverText}>Game Over!</Text>
-          <Text style={styles.finalScoreText}>Final Score: {score}</Text>
+          <Text style={[styles.gameOverText, { color: themeColors.text }]}>Game Over!</Text>
+          <Text style={[styles.finalScoreText, { color: themeColors.text + '99' }]}>Final Score: {score}</Text>
           <TouchableOpacity style={styles.button} onPress={startGame}>
             <Play color="#fff" size={24} />
             <Text style={styles.buttonText}>Play Again</Text>
@@ -41,10 +46,10 @@ export default function GameScreen() {
         </View>
       ) : pattern.length === 0 ? (
         <View style={styles.startContainer}>
-          <Text style={styles.titleText}>Memory Tiles</Text>
+          <Text style={[styles.titleText, { color: themeColors.text }]}>Memory Tiles</Text>
           <TouchableOpacity style={styles.button} onPress={startGame}>
-            <Play color="#fff" size={24} />
-            <Text style={styles.buttonText}>Start Game</Text>
+            <Play color={themeColors.text} size={24} />
+            <Text style={[styles.buttonText, { color: themeColors.text }]}>Start Game</Text>
           </TouchableOpacity>
         </View>
       ) : (
@@ -58,13 +63,12 @@ export default function GameScreen() {
             consecutiveActivations={consecutiveActivations}
             onTilePress={handleTilePress}
           />
-          <View style={styles.bottomPanel}>
+          <View style={[styles.bottomPanel, { backgroundColor: themeColors.controlBar + 'CC' }]}>
             <TouchableOpacity style={styles.iconButton}>
-              <PauseIcon color="#fff" size={28} />
+              <PauseIcon color={themeColors.text} size={28} />
             </TouchableOpacity>
-            <Text style={styles.levelText}>Level {level}</Text>
             <TouchableOpacity style={styles.iconButton} onPress={() => router.push('/settings')}>
-              <SettingsIcon color="#fff" size={28} />
+              <SettingsIcon color={themeColors.text} size={28} />
             </TouchableOpacity>
           </View>
         </>
@@ -76,7 +80,6 @@ export default function GameScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
     paddingTop: 40,
   },
   gameOverContainer: {
@@ -87,15 +90,13 @@ const styles = StyleSheet.create({
   },
   gameOverText: {
     fontSize: 36,
-    color: '#fff',
-    fontFamily: 'Inter-Bold',
+    fontWeight: 'bold',
     marginBottom: 16,
     textAlign: 'center',
   },
   finalScoreText: {
     fontSize: 24,
-    color: '#aaa',
-    fontFamily: 'Inter-SemiBold',
+    fontWeight: '600',
     marginBottom: 40,
   },
   startContainer: {
@@ -106,8 +107,7 @@ const styles = StyleSheet.create({
   },
   titleText: {
     fontSize: 48,
-    color: '#fff',
-    fontFamily: 'Inter-Bold',
+    fontWeight: 'bold',
     marginBottom: 40,
     textAlign: 'center',
     letterSpacing: 1,
@@ -123,9 +123,8 @@ const styles = StyleSheet.create({
     borderColor: '#4CAF50',
   },
   buttonText: {
-    color: '#fff',
     fontSize: 18,
-    fontFamily: 'Inter-Bold',
+    fontWeight: 'bold',
     marginLeft: 12,
     letterSpacing: 1,
   },
@@ -135,7 +134,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 30,
     paddingVertical: 15,
-    backgroundColor: 'rgba(30, 30, 30, 0.8)',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     marginTop: 'auto', // Bu sayede panel en alta yapışır
@@ -144,8 +142,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   levelText: {
-    color: '#fff',
     fontSize: 18,
-    fontFamily: 'Inter-SemiBold',
+    fontWeight: '600',
   },
 });

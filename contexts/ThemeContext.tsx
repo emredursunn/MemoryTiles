@@ -9,6 +9,9 @@ type ThemeColors = {
   controlBar: string;
   tileBg: string;
   accent: string; // Yeni eklenen aksan rengi
+  primary:string,
+  textSecondary:string,
+  divider:string
 };
 
 const lightTheme: ThemeColors = {
@@ -18,6 +21,9 @@ const lightTheme: ThemeColors = {
   controlBar: '#E2E8F0', // Very light gray-blue control area
   tileBg: '#EDF2F7', // Ultra light blue-gray tiles
   accent: '#4299E1', // Vibrant blue for interactive elements
+  primary: '#4361EE',     // Vibrant blue (works well for buttons/active states)
+  textSecondary: '#6B7280', // Medium gray for secondary text
+  divider: '#E5E7EB',     // Light gray divider (subtle but visible)
 };
 
 const darkTheme: ThemeColors = {
@@ -27,6 +33,9 @@ const darkTheme: ThemeColors = {
   controlBar: '#2D3748', // Slightly darker than cards
   tileBg: '#4A5568', // Medium blue-gray tiles
   accent: '#63B3ED', // Soft electric blue for accents
+  primary: '#3A86FF',     // Bright blue (slightly brighter than light theme for better visibility)
+  textSecondary: '#9CA3AF', // Light gray for secondary text
+  divider: '#374151',     // Dark gray divider
 };
 
 // Premium alternatif (daha lüks bir his için):
@@ -37,6 +46,9 @@ const premiumLightTheme: ThemeColors = {
   controlBar: '#DDD6FE', // Medium lavender
   tileBg: '#C4B5FD', // Soft purple tiles
   accent: '#8B5CF6', // Vibrant purple
+  primary: '#4361EE',     // Vibrant blue (works well for buttons/active states)
+  textSecondary: '#6B7280', // Medium gray for secondary text
+  divider: '#E5E7EB',     // Light gray divider (subtle but visible)
 };
 
 const premiumDarkTheme: ThemeColors = {
@@ -46,6 +58,9 @@ const premiumDarkTheme: ThemeColors = {
   controlBar: '#4338CA', // Rich blue control
   tileBg: '#5B21B6', // Royal purple tiles
   accent: '#A78BFA', // Light purple accent
+  primary: '#3A86FF',     // Bright blue (slightly brighter than light theme for better visibility)
+  textSecondary: '#9CA3AF', // Light gray for secondary text
+  divider: '#374151',     // Dark gray divider
 };
 
 const ThemeContext = createContext<ThemeColors>(premiumDarkTheme);

@@ -1,11 +1,10 @@
 // app/settings.tsx
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Switch, ScrollView, TouchableOpacity, StatusBar, Pressable, Animated } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar } from 'react-native';
 import { useSettings } from '../contexts/SettingsContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, Moon, Sun, Grid, Clock, Zap, Check, Activity } from 'lucide-react-native';
-import { BlurView } from 'expo-blur';
+import { ArrowLeft, Moon, Sun, Grid, Zap, Check } from 'lucide-react-native';
 
 export default function SettingsScreen() {
   const {
@@ -20,24 +19,26 @@ export default function SettingsScreen() {
 
   const themeColors = useTheme();
   const router = useRouter();
-  
-  // Speed options in ms
-  const speedOptions = [300, 600, 900, 1200, 1500, 2000];
-  
-  // Grid size options
+
+  // Speed options with labels
+  const speedOptions = [
+    { value: 600, label: "Fast", description: "Quick patterns" },
+    { value: 900, label: "Medium", description: "Balanced speed" },
+    { value: 1500, label: "Slow", description: "Easier to follow" }
+  ];
+
   const gridSizeOptions = [2, 3, 4, 5, 6];
 
   useEffect(() => {
-    // Load settings when component mounts
     loadSettings();
   }, [loadSettings]);
 
   return (
     <View style={[styles.container, { backgroundColor: themeColors.background }]}>
       <StatusBar barStyle={theme === 'dark' ? 'light-content' : 'dark-content'} />
-      
+
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { borderBottomColor: themeColors.divider }]}>
         <TouchableOpacity 
           style={styles.backButton} 
           onPress={() => router.back()}
@@ -49,148 +50,175 @@ export default function SettingsScreen() {
       </View>
 
       <ScrollView 
-        style={styles.scrollView} 
-        contentContainerStyle={styles.scrollContent}
+        style={styles.scrollView}
         showsVerticalScrollIndicator={false}
       >
-        {/* Theme Section */}
+        {/* Theme Section - Box Style */}
         <View style={styles.section}>
-          <View style={styles.sectionTitleContainer}>
-            <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Appearance</Text>
-            {theme === 'dark' ? (
-              <Moon color={themeColors.text} size={18} />
-            ) : (
-              <Sun color={themeColors.text} size={18} />
-            )}
-          </View>
-          
-          <View style={[styles.themeContainer, { backgroundColor: themeColors.card }]}>
+          <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Appearance</Text>
+          <View style={[styles.themeToggleContainer, { backgroundColor: themeColors.card }]}>
             <TouchableOpacity 
-              style={[styles.themeOption, theme === 'light' && styles.activeThemeOption]}
+              style={[
+                styles.themeOptionBox,
+                theme === 'light' && { 
+                  backgroundColor: themeColors.primary + '20',
+                  borderColor: themeColors.primary
+                },
+                { borderColor: themeColors.divider }
+              ]}
               onPress={() => setTheme('light')}
             >
-              <View style={styles.themeContent}>
-                <View style={[styles.themeIconContainer, { backgroundColor: theme === 'light' ? '#FFECB3' : themeColors.card }]}>
-                  <Sun color={theme === 'light' ? '#FF9800' : themeColors.text + '60'} size={24} />
-                </View>
-                <Text style={[styles.themeText, { color: themeColors.text, opacity: theme === 'light' ? 1 : 0.6 }]}>Light</Text>
-                {theme === 'light' && (
-                  <View style={styles.activeIndicator}>
-                    <Check size={16} color="#fff" />
-                  </View>
-                )}
-              </View>
+              <Sun 
+                color={theme === 'light' ? themeColors.primary : themeColors.textSecondary} 
+                size={20} 
+              />
+              <Text style={[
+                styles.themeOptionText,
+                { 
+                  color: theme === 'light' ? themeColors.primary : themeColors.text,
+                }
+              ]}>
+                Light
+              </Text>
             </TouchableOpacity>
             
             <TouchableOpacity 
-              style={[styles.themeOption, theme === 'dark' && styles.activeThemeOption]}
+              style={[
+                styles.themeOptionBox,
+                theme === 'dark' && { 
+                  backgroundColor: themeColors.primary + '20',
+                  borderColor: themeColors.primary
+                },
+                { borderColor: themeColors.divider }
+              ]}
               onPress={() => setTheme('dark')}
             >
-              <View style={styles.themeContent}>
-                <View style={[styles.themeIconContainer, { backgroundColor: theme === 'dark' ? '#5C6BC0' : themeColors.card }]}>
-                  <Moon color={theme === 'dark' ? '#fff' : themeColors.text + '60'} size={24} />
-                </View>
-                <Text style={[styles.themeText, { color: themeColors.text, opacity: theme === 'dark' ? 1 : 0.6 }]}>Dark</Text>
-                {theme === 'dark' && (
-                  <View style={styles.activeIndicator}>
-                    <Check size={16} color="#fff" />
-                  </View>
-                )}
-              </View>
+              <Moon 
+                color={theme === 'dark' ? themeColors.primary : themeColors.textSecondary} 
+                size={20} 
+              />
+              <Text style={[
+                styles.themeOptionText,
+                { 
+                  color: theme === 'dark' ? themeColors.primary : themeColors.text,
+                }
+              ]}>
+                Dark
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
 
         {/* Grid Size Section */}
         <View style={styles.section}>
-          <View style={styles.sectionTitleContainer}>
-            <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Grid Size</Text>
-            <Grid color={themeColors.text} size={18} />
-          </View>
-          
-          <View style={[styles.gridContainer, { backgroundColor: themeColors.card }]}>
-            {gridSizeOptions.map((size) => (
-              <TouchableOpacity
-                key={`grid-${size}`}
-                style={[styles.gridOption, gridSize === size && styles.activeGridOption]}
-                onPress={() => setGridSize(size)}
-              >
-                <View style={styles.gridPreview}>
-                  {Array.from({ length: size }).map((_, rowIndex) => (
-                    <View key={`row-${rowIndex}`} style={styles.gridRow}>
-                      {Array.from({ length: size }).map((_, colIndex) => (
-                        <View 
-                          key={`cell-${rowIndex}-${colIndex}`} 
-                          style={[
-                            styles.gridCell,
-                            { backgroundColor: gridSize === size ? '#4CAF50' : themeColors.tileBg }
-                          ]} 
-                        />
-                      ))}
-                    </View>
-                  ))}
-                </View>
-                <Text style={[styles.gridSizeText, { 
-                  color: gridSize === size ? '#4CAF50' : themeColors.text,
-                  fontWeight: gridSize === size ? '700' : '500'
-                }]}>
-                  {size}×{size}
-                </Text>
-              </TouchableOpacity>
-            ))}
+          <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Grid Size</Text>
+          <View style={[styles.card, { backgroundColor: themeColors.card }]}>
+            <View style={styles.gridOptionsContainer}>
+              {gridSizeOptions.map((size) => (
+                <TouchableOpacity
+                  key={`grid-${size}`}
+                  style={[
+                    styles.gridOption,
+                  ]}
+                  onPress={() => setGridSize(size)}
+                >
+                  <View style={styles.gridPreview}>
+                    {Array.from({ length: size }).map((_, rowIndex) => (
+                      <View key={`row-${rowIndex}`} style={styles.gridRow}>
+                        {Array.from({ length: size }).map((_, colIndex) => (
+                          <View 
+                            key={`cell-${rowIndex}-${colIndex}`} 
+                            style={[
+                              styles.gridCell,
+                              { 
+                                backgroundColor: gridSize === size ? 
+                                  themeColors.primary : 
+                                  themeColors.textSecondary + '40'
+                              } 
+                            ]}
+                          />
+                        ))}
+                      </View>
+                    ))}
+                  </View>
+                  <Text style={[
+                    styles.gridSizeText, 
+                    { 
+                      color: gridSize === size ? 
+                        themeColors.primary : 
+                        themeColors.text
+                    }
+                  ]}>
+                    {size}×{size}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
         </View>
 
-        {/* Speed Section */}
+        {/* Speed Section - Card Style */}
         <View style={styles.section}>
-          <View style={styles.sectionTitleContainer}>
-            <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Pattern Speed</Text>
-            <Activity color={themeColors.text} size={18} />
-          </View>
-          
-          <View style={[styles.speedContainer, { backgroundColor: themeColors.card }]}>
+          <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Pattern Speed</Text>
+          <View style={styles.speedCardsContainer}>
             {speedOptions.map((speed) => {
-              const isActive = displaySpeed === speed;
-              const speedType = speed <= 600 ? 'Fast' : speed <= 1200 ? 'Medium' : 'Slow';
-              const speedColor = speed <= 600 ? '#F44336' : speed <= 1200 ? '#FF9800' : '#4CAF50';
+              const isActive = displaySpeed === speed.value;
               
               return (
                 <TouchableOpacity
-                  key={`speed-${speed}`}
-                  style={[styles.speedOption, isActive && styles.activeSpeedOption]}
-                  onPress={() => setDisplaySpeed(speed)}
+                  key={`speed-${speed.value}`}
+                  style={[
+                    styles.speedCard,
+                    { 
+                      backgroundColor: themeColors.card,
+                      borderColor: isActive ? themeColors.primary : themeColors.divider
+                    }
+                  ]}
+                  onPress={() => setDisplaySpeed(speed.value)}
                 >
-                  <View style={[styles.speedIconContainer, { backgroundColor: isActive ? speedColor + '20' : 'transparent' }]}>
-                    <Zap size={24} color={isActive ? speedColor : themeColors.text + '60'} />
-                    {speed <= 600 && <Zap size={24} color={isActive ? speedColor : themeColors.text + '60'} style={styles.secondZap} />}
+                  <View style={styles.speedCardContent}>
+                    <View style={[
+                      styles.speedIconContainer,
+                      { backgroundColor: isActive ? themeColors.primary + '10' : 'transparent' }
+                    ]}>
+                      <Zap 
+                        size={24} 
+                        color={isActive ? themeColors.primary : themeColors.textSecondary} 
+                        fill={isActive ? themeColors.primary : 'transparent'}
+                      />
+                    </View>
+                    <View>
+                      <Text style={[
+                        styles.speedCardTitle,
+                        { 
+                          color: isActive ? themeColors.primary : themeColors.text,
+                        }
+                      ]}>
+                        {speed.label}
+                      </Text>
+                      <Text style={[
+                        styles.speedCardDescription,
+                        { 
+                          color: isActive ? themeColors.primary + '90' : themeColors.textSecondary,
+                        }
+                      ]}>
+                        {speed.description}
+                      </Text>
+                    </View>
                   </View>
-                  <Text style={[styles.speedValueText, { 
-                    color: isActive ? speedColor : themeColors.text,
-                    fontWeight: isActive ? '700' : '500'
-                  }]}>
-                    {speed} ms
-                  </Text>
-                  <Text style={[styles.speedTypeText, { 
-                    color: isActive ? speedColor : themeColors.text + '80' 
-                  }]}>
-                    {speedType}
-                  </Text>
+                  {isActive && (
+                    <View style={[
+                      styles.speedCardBadge,
+                      { backgroundColor: themeColors.primary }
+                    ]}>
+                      <Text style={styles.speedCardBadgeText}>
+                        {speed.value}ms
+                      </Text>
+                    </View>
+                  )}
                 </TouchableOpacity>
               );
             })}
-          </View>
-        </View>
-
-        {/* About Section */}
-        <View style={styles.section}>
-          <View style={styles.sectionTitleContainer}>
-            <Text style={[styles.sectionTitle, { color: themeColors.text }]}>About</Text>
-          </View>
-          <View style={[styles.aboutContainer, { backgroundColor: themeColors.card }]}>
-            <Text style={[styles.appTitle, { color: themeColors.text }]}>Memory Tiles</Text>
-            <Text style={[styles.appVersion, { color: themeColors.text + '99' }]}>
-              Version 1.0.0
-            </Text>
           </View>
         </View>
       </ScrollView>
@@ -206,102 +234,71 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingTop: 60,
-    paddingBottom: 20,
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
   },
   backButton: {
     padding: 8,
+    marginLeft: -8,
   },
   headerTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
+    fontSize: 20,
+    fontWeight: '600',
   },
   scrollView: {
     flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
+    paddingHorizontal: 16,
   },
   section: {
-    marginBottom: 30,
-  },
-  sectionTitleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 15,
-    paddingLeft: 5,
+    marginBottom: 24,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginRight: 8,
+    fontSize: 16,
+    fontWeight: '500',
+    marginBottom: 12,
+    marginLeft: 8,
   },
-  
-  // Theme styles
-  themeContainer: {
-    flexDirection: 'row',
-    borderRadius: 16,
-    overflow: 'hidden',
-    padding: 10,
-  },
-  themeOption: {
-    flex: 1,
+  card: {
     borderRadius: 12,
-    padding: 16,
-    margin: 5,
+    overflow: 'hidden',
+  },
+  // Theme Toggle Styles
+  themeToggleContainer: {
+    flexDirection: 'row',
+    borderRadius: 12,
+    padding: 8,
+    gap: 8,
+  },
+  themeOptionBox: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    gap: 8,
     position: 'relative',
   },
-  activeThemeOption: {
-    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+  themeOptionText: {
+    fontSize: 15,
+    fontWeight: '500',
   },
-  themeContent: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  themeIconContainer: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  themeText: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  activeIndicator: {
-    position: 'absolute',
-    top: -8,
-    right: -8,
-    backgroundColor: '#4CAF50',
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  
-  // Grid styles
-  gridContainer: {
+  // Grid Size Styles
+  gridOptionsContainer: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     justifyContent: 'space-between',
-    borderRadius: 16,
-    padding: 15,
+    padding: 12,
   },
   gridOption: {
     width: '18%',
     aspectRatio: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 10,
-    borderRadius: 12,
-  },
-  activeGridOption: {
-    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'transparent',
   },
   gridPreview: {
     width: '80%',
@@ -315,66 +312,53 @@ const styles = StyleSheet.create({
   gridCell: {
     flex: 1,
     margin: 1,
-    borderRadius: 2,
+    borderRadius: 1,
   },
   gridSizeText: {
-    fontSize: 14,
+    fontSize: 12,
+    fontWeight: '500',
+    marginTop: 4,
   },
-  
-  // Speed styles
-  speedContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    borderRadius: 16,
-    padding: 15,
+  // Speed Cards Styles
+  speedCardsContainer: {
+    gap: 12,
   },
-  speedOption: {
-    width: '31%',
-    padding: 12,
-    marginBottom: 10,
+  speedCard: {
     borderRadius: 12,
-    alignItems: 'center',
+    borderWidth: 1,
+    padding: 16,
   },
-  activeSpeedOption: {
-    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+  speedCardContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
   },
   speedIconContainer: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 48,
+    height: 48,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
-    position: 'relative',
   },
-  secondZap: {
-    position: 'absolute',
-    left: 10,
-    opacity: 0.7,
-  },
-  speedValueText: {
+  speedCardTitle: {
     fontSize: 16,
+    fontWeight: '600',
     marginBottom: 2,
   },
-  speedTypeText: {
-    fontSize: 12,
-  },
-  
-  // About styles
-  aboutContainer: {
-    borderRadius: 16,
-    padding: 20,
-    alignItems: 'center',
-  },
-  appTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  appVersion: {
+  speedCardDescription: {
     fontSize: 14,
   },
+  speedCardBadge: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  speedCardBadgeText: {
+    color: '#FFF',
+    fontSize: 12,
+    fontWeight: '600',
+  },
 });
-
-// export default SettingsScreen;

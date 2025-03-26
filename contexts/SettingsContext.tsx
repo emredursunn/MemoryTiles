@@ -16,7 +16,7 @@ type SettingsContextType = {
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 export const SettingsProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
-  const [gridSize, setGridSize] = useState(3);
+  const [gridSize, setGridSize] = useState(4);
   const [displaySpeed, setDisplaySpeed] = useState(1000);
   const [theme, setTheme] = useState<ThemeMode>('dark');
 
@@ -25,7 +25,7 @@ export const SettingsProvider: React.FC<{children: React.ReactNode}> = ({ childr
       const savedSettings = await AsyncStorage.getItem('@settings');
       if (savedSettings) {
         const { gridSize: savedSize, displaySpeed: savedSpeed, theme: savedTheme } = JSON.parse(savedSettings);
-        setGridSize(savedSize || 3);
+        setGridSize(savedSize || 4);
         setDisplaySpeed(savedSpeed || 1000);
         setTheme(savedTheme || 'dark');
       }

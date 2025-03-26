@@ -36,9 +36,8 @@ export function GameBoard({
   onTilePress,
 }: GameBoardProps) {
   const gridSize = size;
-  const { playBubbleSound, playFailSound } = useAudio();
+  const { playBubbleSound } = useAudio();
   const themeColors = useTheme();
-  const { theme } = useSettings();
   // Calculate available width after accounting for padding
   const availableWidth = width - PADDING * 2;
   
@@ -64,20 +63,19 @@ const tileSize = Math.min(
   const getTileColor = (index: number): string => {
     'worklet'
     const activationCount = consecutiveActivations[index] || 0;
-    
-    if (activationCount === 0) {
+    if (activationCount == 0) {
       // Use the theme's tile background color
       return themeColors.tileBg;
     }
-
     return colors[Math.min(activationCount - 1, colors.length - 1)];
   };
   
   // Create a single animated style function that will be used for all tiles
   // This ensures the number of hooks remains constant regardless of grid size
+
   const tileActiveState = useSharedValue<Record<number, boolean>>({});
-  
-  // Update the active state based on current game state
+
+  // Tüm tile durumlarını güncelle (orijinal mantık)
   React.useEffect(() => {
     const newState: Record<number, boolean> = {};
     
@@ -89,78 +87,52 @@ const tileSize = Math.min(
     
     tileActiveState.value = newState;
   }, [isShowingPattern, pattern, currentShowingIndex, playerPattern, tileIndices]);
-  
-  // Create a single animated style that will be reused for all tiles
-  const createAnimatedStyle = (index: number) => {
-    return useAnimatedStyle(() => {
+
+  // Tile bileşeni (orijinal animasyon mantığıyla)
+  const Tile = React.memo(({ index, onPress, isShowingPattern, tileSize } : {
+    index: number,
+    onPress: (index: number) => void,
+    isShowingPattern: boolean,
+    tileSize: number
+  }) => {
+    const animatedStyle = useAnimatedStyle(() => {
       const isActive = tileActiveState.value[index] || false;
       
       return {
-        backgroundColor: withTiming(isActive ? getTileColor(index) : '#333333', {
-          duration: 80,
-        }),
+        backgroundColor: withTiming(
+          isActive ? getTileColor(index) : themeColors.tileBg,
+          { duration: 80 }
+        ),
         transform: [
-          {
-            scale: withTiming(isActive ? 1.05 : 1, { duration: 80 }),
-          },
+          { scale: withTiming(isActive ? 1.05 : 1, { duration: 80 }) },
         ],
       };
     });
-  };
-  
-  // Create a fixed number of animated styles that we'll reuse
-  // This ensures we always call the same number of hooks
-  const animatedStyle0 = createAnimatedStyle(0);
-  const animatedStyle1 = createAnimatedStyle(1);
-  const animatedStyle2 = createAnimatedStyle(2);
-  const animatedStyle3 = createAnimatedStyle(3);
-  const animatedStyle4 = createAnimatedStyle(4);
-  const animatedStyle5 = createAnimatedStyle(5);
-  const animatedStyle6 = createAnimatedStyle(6);
-  const animatedStyle7 = createAnimatedStyle(7);
-  const animatedStyle8 = createAnimatedStyle(8);
-  const animatedStyle9 = createAnimatedStyle(9);
-  const animatedStyle10 = createAnimatedStyle(10);
-  const animatedStyle11 = createAnimatedStyle(11);
-  const animatedStyle12 = createAnimatedStyle(12);
-  const animatedStyle13 = createAnimatedStyle(13);
-  const animatedStyle14 = createAnimatedStyle(14);
-  const animatedStyle15 = createAnimatedStyle(15);
-  const animatedStyle16 = createAnimatedStyle(16);
-  const animatedStyle17 = createAnimatedStyle(17);
-  const animatedStyle18 = createAnimatedStyle(18);
-  const animatedStyle19 = createAnimatedStyle(19);
-  const animatedStyle20 = createAnimatedStyle(20);
-  const animatedStyle21 = createAnimatedStyle(21);
-  const animatedStyle22 = createAnimatedStyle(22);
-  const animatedStyle23 = createAnimatedStyle(23);
-  const animatedStyle24 = createAnimatedStyle(24);
-  const animatedStyle25 = createAnimatedStyle(25);
-  const animatedStyle26 = createAnimatedStyle(26);
-  const animatedStyle27 = createAnimatedStyle(27);
-  const animatedStyle28 = createAnimatedStyle(28);
-  const animatedStyle29 = createAnimatedStyle(29);
-  const animatedStyle30 = createAnimatedStyle(30);
-  const animatedStyle31 = createAnimatedStyle(31);
-  const animatedStyle32 = createAnimatedStyle(32);
-  const animatedStyle33 = createAnimatedStyle(33);
-  const animatedStyle34 = createAnimatedStyle(34);
-  const animatedStyle35 = createAnimatedStyle(35);
-  
-  // Create a lookup table for the animated styles
-  const animatedStyles = useMemo(() => {
-    return [
-      animatedStyle0, animatedStyle1, animatedStyle2, animatedStyle3, animatedStyle4, animatedStyle5,
-      animatedStyle6, animatedStyle7, animatedStyle8, animatedStyle9, animatedStyle10, animatedStyle11,
-      animatedStyle12, animatedStyle13, animatedStyle14, animatedStyle15, animatedStyle16, animatedStyle17,
-      animatedStyle18, animatedStyle19, animatedStyle20, animatedStyle21, animatedStyle22, animatedStyle23,
-      animatedStyle24, animatedStyle25, animatedStyle26, animatedStyle27, animatedStyle28, animatedStyle29,
-      animatedStyle30, animatedStyle31, animatedStyle32, animatedStyle33, animatedStyle34, animatedStyle35
-    ];
-  }, []);
-  
-  // The maximum grid size is 6x6 = 36, so we've created 36 animated styles
 
+    return (
+      <Pressable
+        onPress={() => onPress(index)}
+        disabled={isShowingPattern}
+        style={({ pressed }) => [{
+          opacity: pressed ? 0.9 : 1,
+          transform: [{ scale: pressed ? 0.98 : 1 }],
+        }]}>
+        <Animated.View
+          style={[
+            styles.tile,
+            {
+              width: tileSize,
+              height: tileSize,
+              margin: GRID_MARGIN / 2,
+            },
+            animatedStyle,
+          ]}
+        />
+      </Pressable>
+    );
+  });
+
+  // Render kısmı (orijinal düzen)
   return (
     <View style={styles.container}>
       <View
@@ -169,35 +141,21 @@ const tileSize = Math.min(
           {
             width: availableWidth,
             height: availableWidth,
-            paddingHorizontal: GRID_MARGIN / 2, // Add horizontal padding to grid for margins
+            paddingHorizontal: GRID_MARGIN / 2,
           },
         ]}>
         {tileIndices.map((index) => (
-          <Pressable
+          <Tile
             key={index}
-            onPress={() => handlePress(index)}
-            disabled={isShowingPattern}
-            style={({ pressed }) => [{
-              opacity: pressed ? 0.9 : 1,
-              transform: [{ scale: pressed ? 0.98 : 1 }],
-            }]}>
-            <Animated.View
-              style={[
-                styles.tile,
-                {
-                  width: tileSize,
-                  height: tileSize,
-                  margin: GRID_MARGIN / 2,
-                },
-                animatedStyles[index],
-              ]}
-            />
-          </Pressable>
+            index={index}
+            onPress={handlePress}
+            isShowingPattern={isShowingPattern}
+            tileSize={tileSize}
+          />
         ))}
       </View>
     </View>
-  );
-}
+  )};
 
 const styles = StyleSheet.create({
   container: {

@@ -8,32 +8,53 @@ type ThemeColors = {
   card: string;
   controlBar: string;
   tileBg: string;
-  // Diğer tema renkleri...
+  accent: string; // Yeni eklenen aksan rengi
 };
 
 const lightTheme: ThemeColors = {
-  background: '#F5F0E1', // Beige background
-  text: '#5D4037', // Darker brown text
-  card: '#F0E6D2', // Lighter beige for cards
-  controlBar: '#E6D7C3', // Slightly darker beige for controls
-  tileBg: '#D7CCA8', // Default tile color in light mode
+  background: '#F8F9FA', // Soft white with a hint of gray
+  text: '#2D3748', // Deep gray-blue for readability
+  card: '#FFFFFF', // Pure white cards with subtle shadows
+  controlBar: '#E2E8F0', // Very light gray-blue control area
+  tileBg: '#EDF2F7', // Ultra light blue-gray tiles
+  accent: '#4299E1', // Vibrant blue for interactive elements
 };
 
 const darkTheme: ThemeColors = {
-  background: '#121212',
-  text: '#fff',
-  card: '#1e1e1e',
-  controlBar: '#1a1a1a',
-  tileBg: '#333333', // Default tile color in dark mode
+  background: '#1A202C', // Deep blue-gray
+  text: '#E2E8F0', // Soft white with blue tint
+  card: '#2D3748', // Dark gray-blue cards
+  controlBar: '#2D3748', // Slightly darker than cards
+  tileBg: '#4A5568', // Medium blue-gray tiles
+  accent: '#63B3ED', // Soft electric blue for accents
 };
 
-const ThemeContext = createContext<ThemeColors>(darkTheme);
+// Premium alternatif (daha lüks bir his için):
+const premiumLightTheme: ThemeColors = {
+  background: '#F5F3FF', // Ultra light lavender
+  text: '#4C1D95', // Deep purple
+  card: '#EDE9FE', // Light lavender cards
+  controlBar: '#DDD6FE', // Medium lavender
+  tileBg: '#C4B5FD', // Soft purple tiles
+  accent: '#8B5CF6', // Vibrant purple
+};
+
+const premiumDarkTheme: ThemeColors = {
+  background: '#1E1B4B', // Deep navy
+  text: '#E9D5FF', // Soft lavender text
+  card: '#312E81', // Dark navy cards
+  controlBar: '#4338CA', // Rich blue control
+  tileBg: '#5B21B6', // Royal purple tiles
+  accent: '#A78BFA', // Light purple accent
+};
+
+const ThemeContext = createContext<ThemeColors>(premiumDarkTheme);
 
 export const ThemeProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
   const { theme } = useSettings();
   
   return (
-    <ThemeContext.Provider value={theme === 'dark' ? darkTheme : lightTheme}>
+    <ThemeContext.Provider value={theme === 'dark' ? premiumDarkTheme : premiumLightTheme}>
       {children}
     </ThemeContext.Provider>
   );
